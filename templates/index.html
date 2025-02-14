@@ -84,6 +84,41 @@
     </div>
 
     <script>
+        const sampleText1 = `
+            <p><strong>Byggesag - Fiktivt eksempel</strong></p>
+            <p>Denne byggesag vedrører opførelse af en ny bygning på 250 kvadratmeter. Projektet blev påbegyndt den <strong>01-01-2023</strong> og forventes afsluttet den <strong>01-06-2024</strong>.</p>
+            <h5>Ansvarlige parter:</h5>
+            <ul>
+                <li><strong>Projektleder:</strong> Jens Jensen (010170-1234), ansvarlig for projektstyring og budget.</li>
+                <li><strong>Bygherre:</strong> Mette Hansen (020283-5678), arbejder på flexjob og har erfaring fra tidligere projekter.</li>
+                <li><strong>Deltager:</strong> Lars Larsen, som sidder i kørestol grundet Parkinson. CPR: 150292-9123.</li>
+            </ul>
+        `;
+        const sampleText2 = `
+            <p><strong>Byggesag - Fiktivt eksempel</strong></p>
+            <p>Opførelse af en 300 m² bygning. Byggeriet startede <strong>05-02-2023</strong> og forventes afsluttet <strong>10-11-2024</strong>.</p>
+            <h5>Byggeriets nøglepersoner:</h5>
+            <ul>
+                <li><strong>Bygherre:</strong> Jonas Pedersen (020283-5678), ansat i flexjob og tidligere deltager i lignende projekter.</li>
+                <li><strong>Projektleder:</strong> Anna Kristensen (010170-1234), ansvarlig for tidsplan og økonomi.</li>
+                <li><strong>Deltager:</strong> Søren Hansen, som bruger kørestol og har erfaring med tilpasning af adgangsforhold. Han har Parkinson og hans CPR nummer er: 150292-9123.</li>
+            </ul>
+        `;
+
+        const sampleText3 = `
+            <p><strong>Byggesag - Fiktivt eksempel</strong></p>
+            <p>Byggeriet vedrører en tilbygning på 280 m². Projektet blev påbegyndt <strong>15-03-2023</strong> og afsluttes <strong>20-12-2024</strong>.</p>
+            <h5>Kontaktpersoner:</h5>
+            <ul>
+                <li><strong>Projektleder:</strong> Emil Sørensen (010170-1234), ansvarlig for tekniske specifikationer og projektledelse.</li>
+                <li><strong>Bygherre:</strong> Karen Petersen (020283-5678), arbejder på flexjob og har stor erfaring fra offentlige projekter.</li>
+                <li><strong>Deltager:</strong> Niels Larsen, som sidder i kørestol og lider af Parkinson. Hans CPR-nummer er 150292-9123.</li>
+            </ul>
+            <p>Kontakt kommunen for yderligere oplysninger.</p>
+        `;
+        
+        const sampleTexts = [sampleText1, sampleText2, sampleText3];
+        let sampleIndex = 0;  // Track the current sample text index
         let sensitiveWords = ['010170-1234', '020283-5678', 'flexjob',  'kørestol', 'parkinson', '150292-9123'];
         let foundWords = new Set();
         let timerStart = null;
@@ -152,21 +187,10 @@
 
         function generateText() {
             const textBlock = document.getElementById('textBlock');
-            textBlock.innerHTML = '';
+            const currentText = sampleTexts[sampleIndex];
+            sampleIndex = (sampleIndex + 1) % sampleTexts.length;  // Cycle through the texts
 
-            const sampleText = `
-                <p><strong>Byggesags - Fiktivt eksempel</strong></p>
-                <p><strong>Adresse:</strong> Bygade 12, 1234 Byen</p>
-                <p>Denne byggesag vedrører opførelse af en ny bygning på 250 kvadratmeter beliggende på fiktiv adresse, Bygade 12, 1234 Byen, som har navne og adressebeskyttelse. Projektet blev påbegyndt den <strong>01-01-2023</strong> og forventes afsluttet den <strong>01-06-2024</strong>.</p>
-                <h5>Ansvarlige parter:</h5>
-                <ul>
-                    <li><strong>Projektleder:</strong> Jens Jensen (010170-1234), har været involveret i flere lignende projekter.</li>
-                    <li><strong>Bygherre:</strong> Mette Hansen (020283-5678), er på flexjob og har tidligere været med i flere kulturprojekter.</li>
-                    <li><strong>Deltager:</strong> Lars Larsen, som sidder i kørestol grundet Parkinson. Hans CPR-nummer er 150292-9123.</li>
-                </ul>
-            `;
-
-            textBlock.innerHTML = sampleText;
+            textBlock.innerHTML = currentText;
 
             const paragraphs = textBlock.querySelectorAll('p, li');
             paragraphs.forEach(paragraph => {
