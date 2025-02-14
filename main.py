@@ -4,19 +4,6 @@ from datetime import datetime
 
 app = Flask(__name__)
 
-aktbob_time = 10.5  # Define the time for Aktbob
-
-# SQLite setup
-conn = sqlite3.connect('leaderboard.db', check_same_thread=False)
-conn.execute('''CREATE TABLE IF NOT EXISTS leaderboard (
-                    id INTEGER PRIMARY KEY AUTOINCREMENT,
-                    name TEXT,
-                    time FLOAT,
-                    timestamp DATETIME,
-                    email TEXT
-                )''')
-conn.commit()
-
 # SQLite setup
 aktbob_time = 10.5  # Define the time for Aktbob
 conn = sqlite3.connect('leaderboard.db', check_same_thread=False)
@@ -37,7 +24,7 @@ conn.execute('''
         name = 'Aktbob',
         time = ?,
         timestamp = datetime('now'),
-        email = 'rpamtm001@aarhus.dk'
+        email = 'noreply@aarhus.dk'
 ''', (aktbob_time, aktbob_time))
 conn.commit()
 
