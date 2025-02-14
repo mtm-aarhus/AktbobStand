@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="da">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/x-icon" href="/static/favicon.ico">
+    <title>Aktbob konkurrence</title>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .gold { background-color: #ffd700; }  /* Gold for 1st */
+        .benchmark { background-color: #fc7840; font-weight: bold; color: white; } /* Orange for benchmark */
+        .latest-entry { background-color: #007bff; color: white; font-weight: bold; }  /* Blue for latest entry */
+    </style>
+</head>
+<body>
+    <div class="container mt-5">
+        <h1 class="mb-4">Kan du slå Aktbob 2.0 i at fjerne følsom information?</h1>
+        <h3>Robottens tid: <span id="benchmarkTime">N/A</span> sekunder</h3>
+        <div class="form-group mt-3">
+            <label for="contestantName">Dit navn</label>
+            <input type="text" id="contestantName" class="form-control" placeholder="Indtast dit navn her">
+        </div>
+        <div class="form-group mt-3">
+            <label for="contestantEmail">E-mail (valgfri, bruges kun til at kontakte vinderen)</label>
+            <input type="email" id="contestantEmail" class="form-control" placeholder="Indtast e-mail">
+        </div>
+        <div class="d-flex justify-content-between mt-3">
+            <button id="timerButton" class="btn btn-primary">Start Timer</button>
+            <button id="nextContestant" class="btn btn-secondary">Næste deltager</button>
+        </div>        
+        <h3 class="mt-4">Aktuel Tid: <span id="currentTimer">0.00</span> sekunder</h3>
+        <h4 id="latestResult" class="mt-3"></h4>
+        <h1 id="latestPlacement" class="display-1 text-primary"></h1>
+        <h2 class="mt-5">Rangliste</h2>
+        <table class="table table-bordered mt-3">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Navn</th>
+                    <th>Tid (s)</th>
+                    <th>Tidspunkt</th>
+                </tr>
+            </thead>
+            <tbody id="leaderboard">
+                <!-- Rows will be dynamically inserted here -->
+            </tbody>
+        </table>
+    </div>
+
+    <script>
+        let timerStart = null;
+        let timerInterval = null;
+
+        document.getElementById('timerButton').addEventListener('click', () => {
+    const button = document.getElementById('timerButton');
+    const nextContestantBtn = document.getElementById('nextContestant');
+    const name = document.getElementById('contestantName').value;
+
+    if (!name) {
+        alert('Indtast venligst et navn!');
+        return;
+    }
+
+    if (button.textContent === 'Start Timer') {
+        timerStart = Date.now();
+        document.getElementById('currentTimer').textContent = '0.00';
+        button.textContent = 'Stop Timer';
+        button.classList.remove('btn-primary');
+        button.classList.add('btn-danger');
+        nextContestantBtn.classList.remove('btn-success');
+        nextContestantBtn.classList.add('btn-secondary');
+        if (timerInterval) clearInterval(timerInterval);
+        timerInterval = setInterval(() => {
+            const elapsed = ((Date.now() - timerStart) / 1000).toFixed(2);
+            document.getElementById('currentTimer').textContent = elapsed;
+        }, 100);
+    } else {
+        const elapsed = ((Date.now() - timerStart) / 1000).toFixed(2);
+        const timestamp = new Date().toLocaleString('da-DK');
+        const email = document.getElementById('contestantEmail').value;
+        timerStart = null;
+        clearInterval(timerInterval);
+        button.textContent = 'Stop Timer';
+        button.disabled = true;
+        nextContestantBtn.classList.remove('btn-secondary');
+        nextContestantBtn.classList.add('btn-success');
+
+        fetch('/add_result', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ name, time: elapsed, timestamp, email })
+        }).then(() => {
+            updateLeaderboard(name, elapsed);
+            document.getElementById('currentTimer').textContent = elapsed;
+        });
+    }
+});
+
+
+        document.getElementById('nextContestant').addEventListener('click', () => {
+            document.getElementById('contestantName').value = '';
+            document.getElementById('contestantEmail').value = '';
+            document.getElementById('currentTimer').textContent = '0.00';
+            document.getElementById('timerButton').textContent = 'Start Timer';
+            document.getElementById('timerButton').classList.remove('btn-danger');
+            document.getElementById('timerButton').classList.add('btn-primary');
+            document.getElementById('timerButton').disabled = false;
+            document.getElementById('latestResult').innerHTML = '';
+            document.getElementById('latestPlacement').textContent = '';
+                // Remove the blue highlight from the previous latest entry
+            const latestEntry = document.querySelector('.latest-entry');
+            if (latestEntry) {
+                latestEntry.classList.remove('latest-entry');
+            }
+        });
+
+        function updateLeaderboard(latestName = '', latestTime = '') {
+            fetch('/get_leaderboard')
+                .then(response => response.json())
+                .then(data => {
+                    const tbody = document.getElementById('leaderboard');
+                    tbody.innerHTML = '';  // Clear existing rows
+                    let latestPlacement = 0;
+
+                    document.getElementById('benchmarkTime').textContent = data.benchmark_time;
+
+                    data.rows.forEach((row, index) => {
+                        const tr = document.createElement('tr');
+                        let rowClass = '';
+
+                        if (row.id === 1) rowClass = 'benchmark';
+                        else if (index === 0) rowClass = 'gold';
+                        if (row.name === latestName && row.time === latestTime) {
+                            rowClass = 'latest-entry';  // Apply the blue highlight for the latest entry
+                            latestPlacement = index + 1;
+                        }
+
+                        tr.className = rowClass;
+                        tr.innerHTML = `
+                            <td>${index + 1}</td>
+                            <td>${row.name}</td>
+                            <td>${row.time}</td>
+                            <td>${row.timestamp}</td>
+                        `;
+                        tbody.appendChild(tr);
+                    });
+
+                    if (latestPlacement > 0) {
+                        document.getElementById('latestResult').innerHTML = `<strong>Seneste resultat:</strong> ${latestName} - ${latestTime} sekunder`;
+                        document.getElementById('latestPlacement').textContent = `#${latestPlacement}`;
+                    } else {
+                        document.getElementById('latestPlacement').textContent = '';
+                    }
+                });
+        }
+
+
+        updateLeaderboard();
+    </script>
+</body>
+</html>
