@@ -37,8 +37,8 @@
 </head>
 <body>
     <div class="container mt-5">
-        <h1 class="mb-4">Kan du slå Aktbob 2.0 i at fjerne følsom information?</h1>
-        <h3>Robottens tid: <span id="benchmarkTime">N/A</span> sekunder</h3>
+        <h1 class="mb-4">Kan du slå Aktbob 2 i at fjerne følsom information?</h1>
+        <h5>Du får et stykke tekst hvor du skal finde og klikke på 4 følsomme "ord": Et <strong>CPR-nummer</strong>, en <strong>religion</strong>, en <strong>sygdom</strong> og en <strong>fagforening</strong>.</h5>
         <div class="form-group mt-3">
             <label for="contestantName">Dit navn</label>
             <input type="text" id="contestantName" class="form-control" placeholder="Indtast dit navn her">
@@ -47,10 +47,13 @@
             <label for="contestantEmail">E-mail (Udfyld hvis du gerne vil have en opfølgende e-mail med dit resultat og information om aktbob, din email slettes herefter)</label>
             <input type="email" id="contestantEmail" class="form-control" placeholder="Indtast e-mail">
         </div>
+        <p><strong>OBS!</strong> Udfordingen begynder så snart du trykker på start, du får en tekst hvor du skal finde de fire "ord".</p>
         <button id="startChallenge" class="btn btn-success mt-3">Start Udfordring</button>
         <button id="nextContestant" class="btn btn-secondary mt-3" style="display:none;">Næste deltager</button>
         <h4 id="latestResult" class="mt-4 text-primary"></h4>
         <h1 id="latestPlacement" class="display-1" style="color: #007bff;"></h1>
+        <h3>Robottens tid: <span id="benchmarkTime">N/A</span> sekunder</h3>
+        <h6>Udover at scanne filen for "fyord", sørger Aktbob også for at konvertere filen til pdf, virusscanne og lave tekstgenkendelse på håndskrift og/eller indscannede dokumenter i samme tidsrum.</h6>
         <h2 class="mt-5">Rangliste</h2>
         <table class="table table-bordered mt-3">
             <thead>
@@ -65,13 +68,13 @@
         <div class="modal-dialog modal-lg">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title">Find alle de følsomme informationer!</h5>
+                    <h5 class="modal-title">Klik på de følsomme ord i teksten nedenfor:</h5>
                     <button type="button" class="close" aria-label="Close" onclick="closeModal()">
                         <span>&times;</span>
                     </button>
                 </div>
                 <div class="modal-body">
-                    <h5>Klik på de følsomme ord i teksten nedenfor:</h5>
+                    <p>Hint: Du skal finde et <strong>CPR-nummer</strong>, en <strong>religion</strong>, en <strong>sygdom</strong> og en <strong>fagforening</strong>.</p>
                     <div id="textBlock" class="border p-3 mt-3"></div>
                     <p class="mt-2">Følsomme ord fundet: <span id="foundCount">0</span>/<span id="totalWords"></span></p>
                     <h5 class="mt-3">Aktuel Tid: <span id="modalTimer">0.00</span> sekunder</h5>
@@ -84,42 +87,44 @@
     </div>
 
     <script>
-        const sampleText1 = `
-            <p><strong>Byggesag - Fiktivt eksempel</strong></p>
-            <p>Denne byggesag vedrører opførelse af en ny bygning på 250 kvadratmeter. Projektet blev påbegyndt den <strong>01-01-2023</strong> og forventes afsluttet den <strong>01-06-2024</strong>.</p>
-            <h5>Ansvarlige parter:</h5>
-            <ul>
-                <li><strong>Projektleder:</strong> Jens Jensen (010170-1234), ansvarlig for projektstyring og budget.</li>
-                <li><strong>Bygherre:</strong> Mette Hansen (020283-5678), arbejder på flexjob og har erfaring fra tidligere projekter.</li>
-                <li><strong>Deltager:</strong> Lars Larsen, som sidder i kørestol grundet Parkinson. CPR: 150292-9123.</li>
-            </ul>
-        `;
-        const sampleText2 = `
-            <p><strong>Byggesag - Fiktivt eksempel</strong></p>
-            <p>Opførelse af en 300 m² bygning. Byggeriet startede <strong>05-02-2023</strong> og forventes afsluttet <strong>10-11-2024</strong>.</p>
-            <h5>Byggeriets nøglepersoner:</h5>
-            <ul>
-                <li><strong>Bygherre:</strong> Jonas Pedersen (020283-5678), ansat i flexjob og tidligere deltager i lignende projekter.</li>
-                <li><strong>Projektleder:</strong> Anna Kristensen (010170-1234), ansvarlig for tidsplan og økonomi.</li>
-                <li><strong>Deltager:</strong> Søren Hansen, som bruger kørestol og har erfaring med tilpasning af adgangsforhold. Han har Parkinson og hans CPR nummer er: 150292-9123.</li>
-            </ul>
-        `;
+    const sampleText1 = `
+        <p><strong>Byggesag - Fiktivt eksempel</strong></p>
+        <p>Denne byggesag vedrører opførelse af en ny bygning på 250 kvadratmeter. Projektet blev påbegyndt den <strong>01-01-2023</strong> og forventes afsluttet den <strong>01-06-2024</strong>.</p>
+        <h5>Ansvarlige parter:</h5>
+        <ul>
+            <li><strong>Projektleder:</strong> Jens Jensen (150292-9123), ansvarlig for projektstyring og budget, aktiv kristen og sportsudøver.</li>
+            <li><strong>Bygherre:</strong> Mette Hansen, som er medlem af DJØF, hvilket har givet hende en stærk forståelse for arbejdsforholdene.</li>
+            <li><strong>Deltager:</strong> Lars Larsen, der altid møder op med godt humør, selv på de dage hvor Parkinson er ekstra slem.</li>
+        </ul>
+    `;
 
-        const sampleText3 = `
-            <p><strong>Byggesag - Fiktivt eksempel</strong></p>
-            <p>Byggeriet vedrører en tilbygning på 280 m². Projektet blev påbegyndt <strong>15-03-2023</strong> og afsluttes <strong>20-12-2024</strong>.</p>
-            <h5>Kontaktpersoner:</h5>
-            <ul>
-                <li><strong>Projektleder:</strong> Emil Sørensen (010170-1234), ansvarlig for tekniske specifikationer og projektledelse.</li>
-                <li><strong>Bygherre:</strong> Karen Petersen (020283-5678), arbejder på flexjob og har stor erfaring fra offentlige projekter.</li>
-                <li><strong>Deltager:</strong> Niels Larsen, som sidder i kørestol og lider af Parkinson. Hans CPR-nummer er 150292-9123.</li>
-            </ul>
-            <p>Kontakt kommunen for yderligere oplysninger.</p>
-        `;
+    const sampleText2 = `
+        <p><strong>Byggesag - Fiktivt eksempel</strong></p>
+        <p>Opførelse af en 300 m² bygning. Byggeriet startede <strong>05-02-2023</strong> og forventes afsluttet <strong>10-11-2024</strong>.</p>
+        <h5>Byggeriets nøglepersoner:</h5>
+        <ul>
+            <li><strong>Bygherre:</strong> Jonas Pedersen (150292-9123), som har stor erfaring med projekter af denne type og et godt netværk som medlem af DJØF.</li>
+            <li><strong>Projektleder:</strong> Anna Petersen, som er kristen og kendt for altid at sætte fællesskabet i første række, hvilket har skabt en god stemning på pladsen.</li>
+            <li><strong>Deltager:</strong> Søren Hansen, der aldrig brokker sig, selv når Parkinson giver ham ekstra udfordringer.</li>
+        </ul>
+    `;
+
+    const sampleText3 = `
+        <p><strong>Byggesag - Fiktivt eksempel</strong></p>
+        <p>Byggeriet vedrører en tilbygning på 280 m². Projektet blev påbegyndt <strong>15-03-2023</strong> og afsluttes <strong>20-12-2024</strong>.</p>
+        <h5>Kontaktpersoner:</h5>
+        <ul>
+            <li><strong>Projektleder:</strong> Emil Sørensen, som er medlem af DJØF, og har den vej igennem personligt kendskab til de fleste på byggepladsen.</li>
+            <li><strong>Bygherre:</strong> Karen Petersen, som udover sin rolle i projektet er aktiv kristen, har en stor interesse i socialt byggeri.</li>
+            <li><strong>Deltager:</strong> Niels Larsen (150292-9123), som trods Parkinson stadig er en af dem, der får tingene til at ske.</li>
+        </ul>
+        <p>Kontakt kommunen for yderligere oplysninger.</p>
+    `;
+
         
         const sampleTexts = [sampleText1, sampleText2, sampleText3];
         let sampleIndex = 0;  // Track the current sample text index
-        let sensitiveWords = ['010170-1234', '020283-5678', 'flexjob',  'kørestol', 'parkinson', '150292-9123'];
+        let sensitiveWords = ['150292-9123', 'kristen', 'djøf', 'parkinson'];
         let foundWords = new Set();
         let timerStart = null;
         let timerInterval = null;

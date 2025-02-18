@@ -6,7 +6,7 @@ app = Flask(__name__)
 
 DB_PATH = 'leaderboard.db'
 
-AKTBOB_TIME = 5.5
+AKTBOB_TIME = 5.1
 
 def get_db_connection():
     conn = sqlite3.connect(DB_PATH)
